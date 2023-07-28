@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <title>Google Places API - Get All Reviews for a Place</title>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgSFOL9Zi2sW_Cq_k8mzQsbsDkwGaNWU4&libraries=places"></script>
+    <script>
+      async function getReviews(placeId, apiKey) {
+        const reviews = [];
+        let nextPageToken = null;
+
+        do {
+          const url = new URL(
+            "https://maps.googleapis.com/maps/api/place/details/json"
+          );
+          const params = {
+            place_id: placeId,
+            fields: "reviews",
+            key: apiKey,
+            ...(nextPageToken && { pagetoken: nextPageToken }),
+          };
+          Object.keys(params).forEach((key) =>
+            url.searchParams.append(key, params[key])
+          );
+
+          const response = await fetch(url.toString());
+          const data = await response.json();
+
+          if (data.status === "OK" && data.result.reviews) {
+            reviews.push(...data.result.reviews);
+            nextPageToken = data.next_page_token;
+          } else {
+            nextPageToken = null;
+          }
+        } while (nextPageToken);
+
+        return reviews;
+      }
+
+      async function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+          center: { lat: -33.866, lng: 151.196 },
+          zoom: 15,
+        });
+
+        const infowindow = new google.maps.InfoWindow();
+
+        const service = new google.maps.places.PlacesService(map);
+        const placeId = "ChIJ1c6qRafFVTcR-Xo5MVvVd4w";
+        const apiKey = "AIzaSyDgSFOL9Zi2sW_Cq_k8mzQsbsDkwGaNWU4";
+
+        const reviews = await getReviews(placeId, apiKey);
+
+        reviews.forEach((review) => {
+          const marker = new google.maps.Marker({
+            position: review,
+            map: map,
+          });
+
+          google.maps.event.addListener(marker, "click", function () {
+            infowindow.setContent(
+              "<div>" + review.author_name + "<br>" + review.text + "</div>"
+            );
+            infowindow.open(map, this);
+          });
+        });
+      }
+    </script>
+  </head>
+
+  <body onload="initMap()">
+    <div id="map" style="height: 500px;"></div>
+  </body>
+
+</html>

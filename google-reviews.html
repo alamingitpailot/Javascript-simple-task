@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Google Reviews</title>
+    </head>
+
+    <body>
+        <div id="map" style="height: 60%"></div>
+        <script>
+            function initMap() {
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: 53.132330, lng: 23.159630 },
+                    zoom: 12
+                });
+                {% for place in recent_attraction %}
+                var latlng = { lat: {{ place.gps_x }
+            }, lng: { { place.gps_y } }}
+            var marker = new google.maps.Marker({
+                position: latlng,
+                map: map
+            });
+            {% endfor %}
+            }
+        </script>
+        <script
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIOOtr2iADzkBWq3r48fHiZRvnAFcWxHY&callback=initMap"
+            async defer></script>
+    </body>
+
+</html>
